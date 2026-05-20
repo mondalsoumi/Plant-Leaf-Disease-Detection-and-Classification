@@ -1,6 +1,7 @@
 <div align="center">
 
-# 🌿 Leaf Guard — Plant Leaf Disease Detection
+# 🌿 Leaf Guard 
+# Plant Leaf Disease Detection
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-2.0-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
@@ -33,58 +34,6 @@
 | ⚖️ **Disease compare** | Side-by-side modal comparing two diseases and key differences |
 | 🕓 **History** | Client-side detection history table with save / view / delete |
 | 📥 **Export logs** | Download `prediction_logs.csv` from the server |
-
----
-
-## 🏗 Architecture
-
-```mermaid
-flowchart TB
-    subgraph Client["🖥 Browser (Leaf Guard UI)"]
-        A[login.html / signup.html]
-        B[index.html — Upload · Camera · Compare]
-    end
-
-    subgraph Server["⚙ Flask — main.py"]
-        C["/login · /signup · /logout"]
-        D["/predict — POST image"]
-        E["/stats · /confidence-plot"]
-        F["/compare-diseases · /download-logs"]
-        G[(prediction_logs.csv)]
-        H[(users.db — SQLite)]
-    end
-
-    subgraph ML["🧠 TensorFlow / Keras"]
-        I[leaf_disease_model.h5]
-        J[10-class softmax]
-    end
-
-  A --> C --> H
-  B --> D --> I --> J
-  D --> G
-  B --> E --> G
-  B --> F --> G
-```
-
-### Prediction flow
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant UI as index.html
-    participant API as main.py
-    participant M as CNN Model
-    participant L as prediction_logs.csv
-
-    U->>UI: Upload leaf image
-    UI->>API: POST /predict (multipart)
-    API->>API: Resize 224×224, normalize
-    API->>M: model.predict()
-    M-->>API: class + confidence
-    API->>L: Append log row
-    API-->>UI: JSON result + confidence
-    UI-->>U: Disease info, prevention, treatment
-```
 
 ---
 
@@ -423,19 +372,7 @@ Downloads `prediction_logs.csv` as an attachment.
 
 ---
 
-## 🤝 Contributing
 
-Contributions are welcome! Fork the repo, create a feature branch, and open a pull request with a clear description of your changes.
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
 
 **Made with 🌱 for smarter, healthier crops**
 
