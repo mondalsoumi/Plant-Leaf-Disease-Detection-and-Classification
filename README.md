@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-2.0-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.8-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
 
 **Upload a leaf image → CNN classifies the disease → get prevention & treatment guidance**
 
@@ -18,7 +18,7 @@
 
 ## 📖 About the Project
 
-**Leaf Guard** is an end-to-end machine learning web application that helps farmers and gardeners identify plant leaf diseases from photographs. A deep learning model (CNN / transfer learning with EfficientNet) classifies tomato and related crop leaves into **10 categories**—including healthy plants and nine common diseases. The Flask backend serves predictions over REST, logs every scan to CSV for analytics, and protects routes with session-based authentication. The **Leaf Guard** frontend (Bootstrap 5) lets users upload images or use the device camera, view confidence scores, read curated disease descriptions, compare conditions side-by-side, and keep a local detection history—all without leaving the browser.
+**Leaf Guard** is an end-to-end machine learning web application that helps farmers and gardeners identify plant leaf diseases from photographs. A deep learning model (CNN / transfer learning with EfficientNet) classifies tomato and related crop leaves into **10 categories** including healthy plants and nine common diseases. The Flask backend serves predictions over REST, logs every scan to CSV for analytics, and protects routes with session-based authentication. The **Leaf Guard** frontend (Bootstrap 5) lets users upload images or use the device camera, view confidence scores, read curated disease descriptions, compare conditions side-by-side, and keep a local detection history all without leaving the browser.
 
 ---
 
@@ -203,7 +203,7 @@ Leaf-Disease-Detection--main/
 └── results.csv
 ```
 
-> **Note:** Pre-trained weights (`leaf_disease_model.h5`, `best_model.h5`) are **not** in the repo due to size. Download them separately (see below).
+> **Note:** Pre-trained weights (`leaf_disease_model.h5`, `best_model.h5`) are **not** in this repo due to size. Download them separately (see below).
 
 ---
 
