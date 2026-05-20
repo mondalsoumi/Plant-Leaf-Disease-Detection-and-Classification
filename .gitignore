@@ -73,4 +73,8 @@ leaf_disease_model.h5
 
 # OS specific
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Allow screenshots under images/ (override *.jpg / *.png / *.jpeg above)
+!images/
+!images/**/*
