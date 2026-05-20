@@ -1,15 +1,15 @@
 <div align="center">
 
-# 🌿 Leaf Guard — Plant Leaf Disease Detection
+# 🌿 Leaf Guard 
+# Plant Leaf Disease Detection and Classification
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-2.0-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.8-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
 
 **Upload a leaf image → CNN classifies the disease → get prevention & treatment guidance**
 
-[Features](#-features) · [Architecture](#-architecture) · [Modules](#-modules) · [Quick Start](#-quick-start) · [API](#-api-reference) · [Diseases](#-supported-diseases)
 
 </div>
 
@@ -17,7 +17,7 @@
 
 ## 📖 About the Project
 
-**Leaf Guard** is an end-to-end machine learning web application that helps farmers and gardeners identify plant leaf diseases from photographs. A deep learning model (CNN / transfer learning with EfficientNet) classifies tomato and related crop leaves into **10 categories**—including healthy plants and nine common diseases. The Flask backend serves predictions over REST, logs every scan to CSV for analytics, and protects routes with session-based authentication. The **Leaf Guard** frontend (Bootstrap 5) lets users upload images or use the device camera, view confidence scores, read curated disease descriptions, compare conditions side-by-side, and keep a local detection history—all without leaving the browser.
+**Leaf Guard** is an end-to-end machine learning web application that helps farmers and gardeners identify plant leaf diseases from photographs. A deep learning model (CNN / transfer learning with EfficientNet) classifies tomato and related crop leaves into **10 categories** including healthy plants and nine common diseases. The Flask backend serves predictions over REST, logs every scan to CSV for analytics, and protects routes with session-based authentication. The **Leaf Guard** frontend (Bootstrap 5) lets users upload images or use the device camera, view confidence scores, read curated disease descriptions, compare conditions side-by-side, and keep a local detection history all without leaving the browser.
 
 ---
 
@@ -33,58 +33,6 @@
 | ⚖️ **Disease compare** | Side-by-side modal comparing two diseases and key differences |
 | 🕓 **History** | Client-side detection history table with save / view / delete |
 | 📥 **Export logs** | Download `prediction_logs.csv` from the server |
-
----
-
-## 🏗 Architecture
-
-```mermaid
-flowchart TB
-    subgraph Client["🖥 Browser (Leaf Guard UI)"]
-        A[login.html / signup.html]
-        B[index.html — Upload · Camera · Compare]
-    end
-
-    subgraph Server["⚙ Flask — main.py"]
-        C["/login · /signup · /logout"]
-        D["/predict — POST image"]
-        E["/stats · /confidence-plot"]
-        F["/compare-diseases · /download-logs"]
-        G[(prediction_logs.csv)]
-        H[(users.db — SQLite)]
-    end
-
-    subgraph ML["🧠 TensorFlow / Keras"]
-        I[leaf_disease_model.h5]
-        J[10-class softmax]
-    end
-
-  A --> C --> H
-  B --> D --> I --> J
-  D --> G
-  B --> E --> G
-  B --> F --> G
-```
-
-### Prediction flow
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant UI as index.html
-    participant API as main.py
-    participant M as CNN Model
-    participant L as prediction_logs.csv
-
-    U->>UI: Upload leaf image
-    UI->>API: POST /predict (multipart)
-    API->>API: Resize 224×224, normalize
-    API->>M: model.predict()
-    M-->>API: class + confidence
-    API->>L: Append log row
-    API-->>UI: JSON result + confidence
-    UI-->>U: Disease info, prevention, treatment
-```
 
 ---
 
@@ -254,188 +202,9 @@ Leaf-Disease-Detection--main/
 └── results.csv
 ```
 
-> **Note:** Pre-trained weights (`leaf_disease_model.h5`, `best_model.h5`) are **not** in the repo due to size. Download them separately (see below).
+> **Note:** Pre-trained weights (`leaf_disease_model.h5`, `best_model.h5`) are **not** in this repo due to size.
 
----
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python **3.8+**
-- **pip**
-- ~**4 GB RAM** recommended for model inference
-- Git
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/mondalsoumi/Plant-Leaf-Disease-Detection-and-Classification.git
-cd Plant-Leaf-Disease-Detection-and-Classification
-```
-
-### 2. Download model weights
-
-Download pre-trained files and place them in the **project root**:
-
-| File | Size (approx.) |
-|------|----------------|
-| `leaf_disease_model.h5` | ~437 MB |
-| `best_model.h5` | ~437 MB |
-
-📦 [Google Drive — Models](https://drive.google.com/drive/folders/1mWfkgC_Fv5h2oau3eKWz34mYCL2Fu84z?usp=sharing)
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Initialize authentication (optional)
-
-The database is created automatically when `auth.py` is imported, but you can run:
-
-```bash
-python auth.py
-```
-
-### 5. Run the application
-
-```bash
-python main.py
-```
-
-Open **[http://localhost:5000](http://localhost:5000)** → sign up → upload a leaf image → click **Analyze**.
-
----
-
-<details>
-<summary><b>🎓 Train your own model</b></summary>
-
-<br>
-
-Organize images under `dataset/` with one folder per class name (matching `CLASS_NAMES`):
-
-```
-dataset/
-├── Bacterial Spot/
-├── Early Blight/
-├── Healthy/
-└── ... (other classes)
-```
-
-Then run:
-
-```bash
-python train_model.py
-```
-
-This produces `best_model.h5`, `leaf_disease_model.h5`, `confusion_matrix.png`, and `training_history.png`.
-
-</details>
-
-<details>
-<summary><b>📦 Dataset & large artifacts (external)</b></summary>
-
-<br>
-
-Training/testing arrays and plots are hosted externally:
-
-| Resource | Link |
-|----------|------|
-| Models | [Google Drive — Models](https://drive.google.com/drive/folders/1mWfkgC_Fv5h2oau3eKWz34mYCL2Fu84z?usp=sharing) |
-| Dataset (`.npy`, plots) | [Google Drive — Dataset](https://drive.google.com/drive/folders/1uCYCZ61obZEBcUDQeAf9vHfNgXfBqJtT?usp=sharing) |
-
-</details>
-
----
-
-## 🔌 API Reference
-
-All analytics routes require an active **login session** (cookie).
-
-<details>
-<summary><code>POST /predict</code> — Classify a leaf image</summary>
-
-<br>
-
-**Request:** `multipart/form-data` with field `file` (`.png`, `.jpg`, `.jpeg`)
-
-**Response (200):**
-
-```json
-{
-  "result": "Early Blight",
-  "confidence": "86.84%",
-  "timestamp": "2025-04-14 12:48:59"
-}
-```
-
-</details>
-
-<details>
-<summary><code>GET /stats</code> — Prediction aggregates</summary>
-
-<br>
-
-Returns total predictions, class distribution, average confidence, and five most recent entries.
-
-</details>
-
-<details>
-<summary><code>GET /download-logs</code> — Export CSV</summary>
-
-<br>
-
-Downloads `prediction_logs.csv` as an attachment.
-
-</details>
-
----
-
-## 🖼 Usage Walkthrough
-
-```
-  ┌──────────┐    ┌─────────────┐    ┌──────────────┐    ┌─────────────────┐
-  │  Sign up │ →  │ Upload /    │ →  │   Analyze    │ →  │ View disease    │
-  │  / Login │    │ Camera      │    │  /predict    │    │ info & history  │
-  └──────────┘    └─────────────┘    └──────────────┘    └─────────────────┘
-```
-
-1. **Register** or **log in** at `/signup` or `/login`.
-2. **Upload** a leaf photo (or open the camera on the dashboard).
-3. Click **Analyze** — the CNN returns the disease label and confidence.
-4. Read **prevention** and **treatment** steps shown below the result.
-5. **Save to History** or open **Compare Diseases** to contrast two conditions.
-6. Optionally fetch **stats** and **plots** via the JSON API routes.
-
----
-
-## ❓ Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| `OSError: No file or directory: leaf_disease_model.h5` | Download model files from Google Drive and place in project root |
-| `Please log in to access this page` | Visit `/login` first; protected routes need a session |
-| Database errors | Delete corrupted `users.db` and restart the app (auto-recreates) |
-| Out of memory | Close other apps; model needs ~4 GB RAM |
-| Low accuracy on new images | Retrain with `train_model.py` using your own labeled dataset |
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Fork the repo, create a feature branch, and open a pull request with a clear description of your changes.
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
 
 **Made with 🌱 for smarter, healthier crops**
 
