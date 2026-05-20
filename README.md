@@ -10,7 +10,7 @@
 
 **Upload a leaf image → CNN classifies the disease → get prevention & treatment guidance**
 
-[Features](#-features) · [Architecture](#-architecture) · [Modules](#-modules) · [Quick Start](#-quick-start) · [API](#-api-reference) · [Diseases](#-supported-diseases)
+[Features](#-features) · [Modules](#-modules) · [Quick Start](#-quick-start) · [API](#-api-reference) · [Diseases](#-supported-diseases)
 
 </div>
 
