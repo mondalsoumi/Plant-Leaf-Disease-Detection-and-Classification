@@ -1,0 +1,21 @@
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.card {
+    border-radius: 1rem;
+}
+
+input[type="file"]::file-selector-button {
+    border: none;
+    background-color: #198754;
+    color: white;
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+    border-radius: 5px;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background-color: #157347;
+}

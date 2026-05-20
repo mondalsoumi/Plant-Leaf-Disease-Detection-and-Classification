@@ -1,0 +1,14 @@
+const res = await fetch('/predict', {
+    method: 'POST',
+    body: formData
+  });
+
+  const data = await res.json();
+  if (data.prediction) {
+    document.getElementById('result').innerHTML = `
+      Prediction: <strong>${data.prediction}</strong><br>
+      Confidence: <strong>${data.confidence}</strong><br>
+      <img src="/uploads/${data.image}" style="max-width: 300px; margin-top: 10px;">
+    `;
+  }
+});

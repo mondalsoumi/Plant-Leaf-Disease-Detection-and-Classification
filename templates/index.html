@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaf Guard: Plant Disease Detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a472a, #2d5a3f);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+        }
+        .upload-area {
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            background: rgba(76, 175, 80, 0.1);
+        }
+        .disease-info {
+            display: none;
+            margin-top: 20px;
+        }
+        .prevention-steps {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .prevention-steps li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+        .prevention-steps li:before {
+            content: "🌿";
+            position: absolute;
+            left: 0;
+        }
+        .confidence-bar {
+            height: 20px;
+            background: #4CAF50;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        .camera-feed {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: none;
+        }
+        .btn-custom {
+            background: #4CAF50;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="text-center mb-4">
+            <h1 class="display-4 fw-bold">🌿 Leaf Guard</h1>
+            <p class="lead">Advanced Plant Disease Detection & Prevention</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card p-4 mb-4">
+                    <div class="user-info">
+                        <h2>Leaf Disease Detection</h2>
+                        <div>
+                            <span class="me-3">Welcome, {{ session.username }}</span>
+                            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+                        </div>
+                    </div>
+                    
+            <form id="uploadForm" action="/predict" method="POST" enctype="multipart/form-data">
+                        <div class="upload-area mb-4" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                            <h4>Upload Leaf Image</h4>
+                            <p class="text-muted">Click to upload or drag and drop</p>
+                            <input type="file" class="d-none" name="file" id="fileInput" accept="image/*" required>
+                        </div>
+
+                        <div class="text-center mb-3">
+                            <button type="submit" class="btn btn-custom me-2">
+                                <i class="fas fa-search"></i> Analyze
+                            </button>
+                            <button type="button" class="btn btn-custom" onclick="openCamera()">
+                                <i class="fas fa-camera"></i> Use Camera
+                            </button>
+                            <button type="button" class="btn btn-custom" onclick="showDiseaseComparison()">
+                                <i class="fas fa-exchange-alt"></i> Compare Diseases
+                            </button>
+                        </div>
+
+                        <video id="cameraFeed" class="camera-feed" autoplay playsinline></video>
+                    </form>
+
+                    <div id="preview" class="text-center">
+                        <img id="previewImage" src="#" alt="Preview" class="img-fluid rounded mb-3" style="display: none; max-height: 300px;">
+                    </div>
+
+                    <div id="result" class="disease-info">
+                        <h3 class="mb-3">Analysis Results</h3>
+                        <div class="alert alert-success">
+                            <h4 id="diseaseName"></h4>
+                            <div class="mb-2">Confidence: <span id="confidence"></span></div>
+                            <div class="confidence-bar" id="confidenceBar"></div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h4>About the Disease</h4>
+                            <p id="diseaseDescription"></p>
+
+                            <h4 class="mt-4">Prevention Steps</h4>
+                            <ul class="prevention-steps" id="preventionSteps"></ul>
+
+                            <h4 class="mt-4">Treatment Options</h4>
+                            <ul class="prevention-steps" id="treatmentOptions"></ul>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button class="btn btn-custom" onclick="saveToHistory()">
+                                <i class="fas fa-save"></i> Save to History
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Detection History -->
+                <div class="card p-4 mb-4">
+                    <h3 class="mb-3">Detection History</h3>
+                    <div id="detectionHistory" class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Disease</th>
+                                    <th>Confidence</th>
+                                    <th>Image</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <!-- History items will be added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Disease Comparison Modal -->
+                <div class="modal fade" id="comparisonModal" tabindex="-1" aria-labelledby="comparisonModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content bg-dark text-light">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="comparisonModalLabel">Disease Comparison</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <select class="form-select bg-dark text-light" id="disease1Select">
+                                            <option value="">Select first disease</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-select bg-dark text-light" id="disease2Select">
+                                            <option value="">Select second disease</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div id="disease1Info" class="p-3 border rounded">
+                                            <h4 id="disease1Name">Select a disease</h4>
+                                            <p id="disease1Description">Description will appear here</p>
+                                            <h5>Key Symptoms:</h5>
+                                            <ul id="disease1Symptoms"></ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div id="disease2Info" class="p-3 border rounded">
+                                            <h4 id="disease2Name">Select a disease</h4>
+                                            <p id="disease2Description">Description will appear here</p>
+                                            <h5>Key Symptoms:</h5>
+                                            <ul id="disease2Symptoms"></ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <h5>Key Differences:</h5>
+                                    <div id="differencesList" class="p-3 border rounded">
+                                        <p>Select two diseases to compare</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // File upload preview
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const image = document.getElementById('previewImage');
+            image.src = URL.createObjectURL(event.target.files[0]);
+            image.style.display = 'block';
+        });
+
+        // Camera functionality
+        async function openCamera() {
+            const video = document.getElementById('cameraFeed');
+            video.style.display = 'block';
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (err) {
+                alert('Error accessing camera: ' + err.message);
+            }
+        }
+
+        // Disease information database
+        const diseaseInfo = {
+            'Bacterial Spot': {
+                description: 'Bacterial spot is a common disease that affects tomato plants, causing dark brown spots on leaves and fruits.',
+                prevention: [
+                    'Use disease-free seeds and transplants',
+                    'Practice crop rotation',
+                    'Maintain proper spacing between plants',
+                    'Avoid overhead irrigation',
+                    'Remove and destroy infected plants'
+                ],
+                treatment: [
+                    'Apply copper-based bactericides',
+                    'Use resistant varieties',
+                    'Remove infected leaves and fruits',
+                    'Maintain proper plant nutrition'
+                ]
+            },
+            'Early Blight': {
+                description: 'Early blight is a fungal disease that causes dark brown spots with concentric rings on leaves and stems.',
+                prevention: [
+                    'Use disease-free seeds',
+                    'Practice crop rotation',
+                    'Maintain good air circulation',
+                    'Avoid overhead watering',
+                    'Remove plant debris'
+                ],
+                treatment: [
+                    'Apply fungicides containing chlorothalonil',
+                    'Remove infected leaves',
+                    'Improve air circulation',
+                    'Maintain proper plant nutrition'
+                ]
+            },
+            'Healthy': {
+                description: 'Your plant appears to be healthy with no signs of disease.',
+                prevention: [
+                    'Continue regular monitoring',
+                    'Maintain proper watering schedule',
+                    'Ensure adequate sunlight',
+                    'Keep plants well-fertilized',
+                    'Practice good garden hygiene'
+                ],
+                treatment: [
+                    'No treatment needed',
+                    'Continue regular care',
+                    'Monitor for any changes',
+                    'Maintain optimal growing conditions'
+                ]
+            },
+            'Late Blight': {
+                description: 'Late blight is a serious fungal disease that causes large, dark brown patches on leaves and can affect fruits.',
+                prevention: [
+                    'Use certified disease-free seeds',
+                    'Practice crop rotation',
+                    'Maintain good air circulation',
+                    'Avoid overhead watering',
+                    'Remove plant debris'
+                ],
+                treatment: [
+                    'Apply fungicides containing chlorothalonil or copper',
+                    'Remove and destroy infected plants',
+                    'Improve air circulation',
+                    'Maintain proper plant nutrition'
+                ]
+            },
+            'Leaf Mold': {
+                description: 'Leaf mold is a fungal disease that causes yellow spots on leaves that eventually turn brown.',
+                prevention: [
+                    'Use disease-free seeds',
+                    'Maintain proper spacing',
+                    'Ensure good air circulation',
+                    'Avoid overhead watering',
+                    'Remove plant debris'
+                ],
+                treatment: [
+                    'Apply appropriate fungicides',
+                    'Remove infected leaves',
+                    'Improve air circulation',
+                    'Maintain proper plant nutrition'
+                ]
+            },
+            'Septoria Leaf Spot': {
+                description: 'Septoria leaf spot is a fungal disease that causes small, circular spots with gray centers and dark borders on leaves.',
+                prevention: [
+                    'Use disease-free seeds',
+                    'Practice crop rotation',
+                    'Maintain good air circulation',
+                    'Avoid overhead watering',
+                    'Remove plant debris'
+                ],
+                treatment: [
+                    'Apply fungicides containing chlorothalonil or copper',
+                    'Remove infected leaves',
+                    'Improve air circulation',
+                    'Maintain proper plant nutrition'
+                ]
+            },
+            'Spider Mites': {
+                description: 'Spider mites are tiny arachnids that feed on plant sap, causing stippling, yellowing, and webbing on leaves.',
+                prevention: [
+                    'Maintain proper humidity levels',
+                    'Avoid over-fertilization with nitrogen',
+                    'Regularly inspect plants for early signs',
+                    'Keep plants well-watered',
+                    'Introduce natural predators like ladybugs'
+                ],
+                treatment: [
+                    'Apply insecticidal soap or neem oil',
+                    'Use miticides for severe infestations',
+                    'Increase humidity around plants',
+                    'Remove heavily infested leaves',
+                    'Consider biological control methods'
+                ]
+            },
+            'Target Spot': {
+                description: 'Target spot is a fungal disease that causes circular, target-like lesions with concentric rings on leaves and fruits.',
+                prevention: [
+                    'Use disease-free seeds',
+                    'Practice crop rotation',
+                    'Maintain good air circulation',
+                    'Avoid overhead watering',
+                    'Remove plant debris'
+                ],
+                treatment: [
+                    'Apply fungicides containing chlorothalonil',
+                    'Remove infected leaves and fruits',
+                    'Improve air circulation',
+                    'Maintain proper plant nutrition'
+                ]
+            },
+            'Tomato Yellow Leaf Curl Virus': {
+                description: 'Tomato Yellow Leaf Curl Virus is a viral disease that causes yellowing, curling, and stunting of leaves, transmitted by whiteflies.',
+                prevention: [
+                    'Use virus-free transplants',
+                    'Control whitefly populations',
+                    'Use reflective mulches',
+                    'Plant resistant varieties',
+                    'Remove infected plants immediately'
+                ],
+                treatment: [
+                    'No cure for infected plants',
+                    'Remove and destroy infected plants',
+                    'Control whitefly populations with insecticides',
+                    'Plant resistant varieties in future seasons'
+                ]
+            },
+            'Two-Spotted Spider Mite': {
+                description: 'Two-spotted spider mites are tiny arachnids that cause stippling, yellowing, and webbing on leaves, with two dark spots on their bodies.',
+                prevention: [
+                    'Maintain proper humidity levels',
+                    'Avoid over-fertilization with nitrogen',
+                    'Regularly inspect plants for early signs',
+                    'Keep plants well-watered',
+                    'Introduce natural predators like ladybugs'
+                ],
+                treatment: [
+                    'Apply insecticidal soap or neem oil',
+                    'Use miticides for severe infestations',
+                    'Increase humidity around plants',
+                    'Remove heavily infested leaves',
+                    'Consider biological control methods'
+                ]
+            }
+        };
+        
+        // Disease symptoms database
+        const diseaseSymptoms = {
+            'Bacterial Spot': [
+                'Small, dark brown spots with yellow halos',
+                'Spots may coalesce to form larger lesions',
+                'Spots on fruits are raised and scabby',
+                'Leaves may yellow and drop prematurely'
+            ],
+            'Early Blight': [
+                'Dark brown spots with concentric rings',
+                'Spots typically appear on older leaves first',
+                'Leaves may develop a "target" appearance',
+                'Stems may develop dark, sunken lesions'
+            ],
+            'Healthy': [
+                'Uniform green color',
+                'No spots or discoloration',
+                'Normal leaf shape and size',
+                'No signs of wilting or damage'
+            ],
+            'Late Blight': [
+                'Large, dark brown patches on leaves',
+                'White, fuzzy growth on undersides of leaves',
+                'Dark, sunken lesions on stems',
+                'Brown, firm spots on fruits'
+            ],
+            'Leaf Mold': [
+                'Yellow spots on upper leaf surface',
+                'Purple-brown mold on lower leaf surface',
+                'Leaves may curl and die',
+                'Fruits may develop black spots'
+            ],
+            'Septoria Leaf Spot': [
+                'Small, circular spots with gray centers',
+                'Dark borders around spots',
+                'Spots may coalesce to form larger lesions',
+                'Leaves may yellow and drop prematurely'
+            ],
+            'Spider Mites': [
+                'Fine stippling on leaves',
+                'Yellowing or bronzing of leaves',
+                'Fine webbing on undersides of leaves',
+                'Leaves may become dry and drop'
+            ],
+            'Target Spot': [
+                'Circular, target-like lesions with concentric rings',
+                'Spots may have a dark center',
+                'Lesions on fruits are sunken with dark centers',
+                'Leaves may yellow and drop prematurely'
+            ],
+            'Tomato Yellow Leaf Curl Virus': [
+                'Yellowing and curling of leaves',
+                'Stunted plant growth',
+                'Reduced fruit production',
+                'Leaves may become thick and leathery'
+            ],
+            'Two-Spotted Spider Mite': [
+                'Fine stippling on leaves',
+                'Yellowing or bronzing of leaves',
+                'Fine webbing on undersides of leaves',
+                'Two dark spots visible on mite bodies'
+            ]
+        };
+
+        // Handle form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Display results
+                resultDiv.style.display = 'block';
+                document.getElementById('diseaseName').textContent = data.result;
+                document.getElementById('confidence').textContent = data.confidence;
+                document.getElementById('confidenceBar').style.width = data.confidence;
+
+                // Display disease information
+                const info = diseaseInfo[data.result];
+                document.getElementById('diseaseDescription').textContent = info.description;
+                
+                // Display prevention steps
+                const preventionList = document.getElementById('preventionSteps');
+                preventionList.innerHTML = info.prevention.map(step => `<li>${step}</li>`).join('');
+                
+                // Display treatment options
+                const treatmentList = document.getElementById('treatmentOptions');
+                treatmentList.innerHTML = info.treatment.map(option => `<li>${option}</li>`).join('');
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+        
+        // Save detection to history
+        function saveToHistory() {
+            const diseaseName = document.getElementById('diseaseName').textContent;
+            const confidence = document.getElementById('confidence').textContent;
+            const imageSrc = document.getElementById('previewImage').src;
+            
+            if (!diseaseName || diseaseName === '') {
+                alert('Please analyze an image first');
+                return;
+            }
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+            
+            const historyTableBody = document.getElementById('historyTableBody');
+            const newRow = document.createElement('tr');
+            
+            newRow.innerHTML = `
+                <td>${dateStr}</td>
+                <td>${diseaseName}</td>
+                <td>${confidence}</td>
+                <td><img src="${imageSrc}" alt="${diseaseName}" style="max-height: 50px;"></td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="viewHistoryItem(this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteHistoryItem(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            historyTableBody.prepend(newRow);
+            alert('Detection saved to history');
+        }
+    </script>
+</body>
+</html>

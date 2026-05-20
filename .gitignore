@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project specific
+*.h5
+*.npy
+*.pkl
+*.model
+*.weights
+*.bin
+*.dat
+uploads/
+static/uploads/
+*.db
+*.log
+
+# Large files
+*.pdf
+*.docx
+*.doc
+*.jpeg
+*.jpg
+*.png
+!requirements.txt
+!README.md
+
+# Keep these files
+!templates/
+!static/css/
+!static/js/
+!static/img/
+
+# Specific files to ignore
+test_data.npy
+test_labels.npy
+confusion_matrix.npy
+metrics.json
+training_history.json
+training_history.png
+confusion_matrix.png
+best_model.h5
+leaf_disease_model.h5
+
+# OS specific
+.DS_Store
+Thumbs.db 
