@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🌿 Leaf Guard 
-# Plant Leaf Disease Detection
+# Plant Leaf Disease Detection and Classification
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-2.0-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
